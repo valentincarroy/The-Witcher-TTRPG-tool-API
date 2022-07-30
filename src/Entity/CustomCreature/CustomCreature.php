@@ -4,6 +4,7 @@ namespace App\Entity\CustomCreature;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Entity\Account;
+use App\Entity\Battle\Team;
 use App\Entity\Battle\Turn;
 use App\Entity\Creature\Creature;
 use App\Repository\CustomCreature\CustomCreatureRepository;
@@ -55,12 +56,16 @@ class CustomCreature
     #[ORM\JoinColumn(nullable: false)]
     private $account;
 
+    #[ORM\ManyToMany(targetEntity: Team::class, inversedBy: 'customCreatures')]
+    private $teams;
+
     public function __construct()
     {
         $this->effects = new ArrayCollection();
         $this->turn = new ArrayCollection();
         $this->gears = new ArrayCollection();
         $this->capacities = new ArrayCollection();
+        $this->teams = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -268,6 +273,30 @@ class CustomCreature
     public function setAccount(?Account $account): self
     {
         $this->account = $account;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Team>
+     */
+    public function getTeams(): Collection
+    {
+        return $this->teams;
+    }
+
+    public function addTeam(Team $team): self
+    {
+        if (!$this->teams->contains($team)) {
+            $this->teams[] = $team;
+        }
+
+        return $this;
+    }
+
+    public function removeTeam(Team $team): self
+    {
+        $this->teams->removeElement($team);
 
         return $this;
     }

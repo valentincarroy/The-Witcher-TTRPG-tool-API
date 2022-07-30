@@ -3,7 +3,10 @@
 namespace App\Entity\Battle;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Entity\CustomCreature\CustomCreature;
 use App\Repository\Battle\TeamRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TeamRepository::class)]
@@ -24,6 +27,14 @@ class Team
     #[ORM\ManyToOne(targetEntity: Battle::class, inversedBy: 'teams')]
     #[ORM\JoinColumn(nullable: false)]
     private $battle;
+
+    #[ORM\ManyToMany(targetEntity: CustomCreature::class, mappedBy: 'teams')]
+    private $customCreatures;
+
+    public function __construct()
+    {
+        $this->customCreatures = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -62,6 +73,33 @@ class Team
     public function setBattle(?Battle $battle): self
     {
         $this->battle = $battle;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CustomCreature>
+     */
+    public function getCustomCreatures(): Collection
+    {
+        return $this->customCreatures;
+    }
+
+    public function addCustomCreature(CustomCreature $customCreature): self
+    {
+        if (!$this->customCreatures->contains($customCreature)) {
+            $this->customCreatures[] = $customCreature;
+            $customCreature->addTeam($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCustomCreature(CustomCreature $customCreature): self
+    {
+        if ($this->customCreatures->removeElement($customCreature)) {
+            $customCreature->removeTeam($this);
+        }
 
         return $this;
     }
